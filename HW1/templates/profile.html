@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>나의 취미</title>
+</head>
+<body>
+    <h1>나의 취미 3가지</h1>
+
+    <ul>
+        {% for hobby in hobbies %}
+            <li>{{ hobby }}</li>
+        {% endfor %}
+    </ul>
+
+    <hr>
+
+    <nav>
+        <a href="/">홈</a> |
+        <a href="/profile">취미 소개</a> |
+        <a href="/greet/이동훈">인사 페이지</a>
+    </nav>
+</body>
+</html>
