@@ -1,7 +1,5 @@
-<h1>{{ username }} 님의 프로필</h1>
-<h2>글 목록 ({{ posts | length }}개)</h2>
-<ul>
-{% for p in posts %}
-<li>{{ loop.index }}. {{ p }}</li>
-{% endfor %}
-</ul>
+{% extends "base.html" %}
+{% block title %}{{ username }} 님의 프로필{% endblock %}
+{% block content %}
+... 실습 3-2 에서 쓴 내용을 그대로 여기에 ...
+{% endblock %}
