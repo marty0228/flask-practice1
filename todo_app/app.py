@@ -5,9 +5,10 @@ todos = []
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
-        todo = request.form['todo']
-        todos.append(todo)
+        todos.append({'text': request.form['todo'], 'done': False})
+        return redirect(url_for('index'))
     return render_template('index.html', todos=todos)
+
 @app.route('/delete/<int:index>')
 def delete(index):
     if 0 <= index < len(todos):
