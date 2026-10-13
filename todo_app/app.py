@@ -4,7 +4,8 @@ from flask_sqlalchemy import SQLAlchemy
 app = Flask(__name__)
 
 # 데이터베이스 위치. 파일 하나면 끝입니다
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///todo.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://flask_user:password@localhost/flask_todo_db'
+
 
 db = SQLAlchemy(app)
 
