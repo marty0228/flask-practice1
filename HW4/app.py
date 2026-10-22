@@ -28,14 +28,15 @@ class Todo(db.Model):
         return f'<Todo {self.id} {self.text}>'
 
 
-# 기존 화면 라우트
+# 기존 화면 라우트 (HW3)
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
-        db.session.add(Todo(
+        todo = Todo(
             text=request.form['todo'],
             note=request.form.get('note', '')
-        ))
+        )
+        db.session.add(todo)
         db.session.commit()
         return redirect(url_for('index'))
 
@@ -51,6 +52,17 @@ def toggle(id):
     return redirect(url_for('index'))
 
 
+@app.route('/edit/<int:id>', methods=['GET', 'POST'])
+def edit(id):
+    todo = db.get_or_404(Todo, id)
+    if request.method == 'POST':
+        todo.text = request.form['todo']
+        todo.note = request.form.get('note', '')
+        db.session.commit()
+        return redirect(url_for('index'))
+    return render_template('edit.html', todo=todo)
+
+
 @app.route('/delete/<int:id>')
 def delete(id):
     todo = db.get_or_404(Todo, id)
@@ -59,7 +71,7 @@ def delete(id):
     return redirect(url_for('index'))
 
 
-# API
+# API (L7-2 및 L7-3)
 api_bp = Blueprint("api", __name__, url_prefix="/api")
 
 api = Api(
@@ -70,68 +82,36 @@ api = Api(
     doc="/docs",
 )
 
-ns = api.namespace(
-    "todos",
-    description="할 일 하나하나를 다루는 곳"
-)
+ns = api.namespace("todos", description="할 일 하나하나를 다루는 곳")
 
 
 # 주고받을 데이터의 모양
 todo_model = api.model("Todo", {
-    "id": fields.Integer(
-        readonly=True,
-        description="줄 번호. 서버가 붙입니다"
-    ),
-    "text": fields.String(
-        required=True,
-        description="할 일 글자",
-        example="우유 사기"
-    ),
-    "done": fields.Boolean(
-        description="완료 여부",
-        example=False
-    ),
-    "note": fields.String(
-        description="설명",
-        example="2리터짜리로"
-    ),
+    "id": fields.Integer(readonly=True, description="줄 번호. 서버가 붙입니다"),
+    "text": fields.String(required=True, description="할 일 글자", example="우유 사기"),
+    "done": fields.Boolean(description="완료 여부", example=False),
+    "note": fields.String(description="설명", example="2리터짜리로"),
 })
 
 todo_input = api.model("TodoInput", {
-    "text": fields.String(
-        required=True,
-        description="할 일 글자",
-        example="우유 사기"
-    ),
-    "done": fields.Boolean(
-        description="완료 여부",
-        example=False
-    ),
-    "note": fields.String(
-        description="설명",
-        example="2리터짜리로"
-    ),
+    "text": fields.String(required=True, description="할 일 글자", example="우유 사기"),
+    "done": fields.Boolean(description="완료 여부", example=False),
+    "note": fields.String(description="설명", example="2리터짜리로"),
 })
 
 
-# 목록 보기와 새로 만들기
 @ns.route("/")
 class TodoList(Resource):
 
     @ns.doc("목록 보기")
-    @ns.param(
-        "done",
-        "true 면 완료만, false 면 아직 안 한 것만"
-    )
+    @ns.param("done", "true 면 완료만, false 면 아직 안 한 것만")
     @ns.marshal_list_with(todo_model)
     def get(self):
         """할 일을 돌려준다. done 을 주면 걸러서 돌려준다"""
         q = Todo.query
         done = request.args.get("done")
-
         if done is not None:
             q = q.filter_by(done=(done.lower() == "true"))
-
         return q.all()
 
     @ns.doc("새로 만들기")
@@ -144,16 +124,11 @@ class TodoList(Resource):
             done=api.payload.get("done", False),
             note=api.payload.get("note", "")
         )
-
         db.session.add(todo)
         db.session.commit()
-
-        return todo, 201, {
-            "Location": f"/api/todos/{todo.id}"
-        }
+        return todo, 201, {"Location": f"/api/todos/{todo.id}"}
 
 
-# 번호 하나를 보는 주소
 @ns.route("/<int:id>")
 @ns.param("id", "할 일의 줄 번호")
 @ns.response(404, "그 번호의 할 일이 없습니다")
@@ -182,16 +157,12 @@ class TodoItem(Resource):
     def patch(self, id):
         """보낸 칸만 바꾼다. 완료 표시를 뒤집을 때 씁니다"""
         todo = get_or_abort(id)
-
         if "text" in api.payload:
             todo.text = api.payload["text"]
-
         if "done" in api.payload:
             todo.done = api.payload["done"]
-
         if "note" in api.payload:
             todo.note = api.payload["note"]
-
         db.session.commit()
         return todo
 
@@ -208,10 +179,8 @@ class TodoItem(Resource):
 def get_or_abort(id):
     """없는 번호면 404 를 JSON 으로 돌려준다."""
     todo = db.session.get(Todo, id)
-
     if todo is None:
         ns.abort(404, f"{id} 번 할 일이 없습니다")
-
     return todo
 
 
