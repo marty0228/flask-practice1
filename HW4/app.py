@@ -148,6 +148,7 @@ class TodoItem(Resource):
         todo = get_or_abort(id)
         todo.text = api.payload["text"]
         todo.done = api.payload.get("done", False)
+        todo.note = api.payload.get("note", "")
         db.session.commit()
         return todo
 
