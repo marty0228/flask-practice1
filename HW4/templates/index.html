@@ -6,6 +6,7 @@
 <h2>Add New Todo</h2>
 <form method="post">
     <input type="text" name="todo" required>
+    <input type="text" name="note" placeholder="설명">
     <button type="submit">Add Todo</button>
 </form>
 
@@ -20,6 +21,11 @@
         {% else %}
             {{ todo.text }}
         {% endif %}
+
+        {% if todo.note %}
+            <p>{{ todo.note }}</p>
+        {% endif %}
+
         <a href="{{ url_for('delete', id=todo.id) }}">Delete</a>
     </li>
     {% endfor %}
