@@ -21,11 +21,10 @@
         {% else %}
             {{ todo.text }}
         {% endif %}
-
         {% if todo.note %}
-            <p>{{ todo.note }}</p>
+            <span class="note">{{ todo.note }}</span>
         {% endif %}
-
+        <a href="{{ url_for('edit', id=todo.id) }}">수정</a>
         <a href="{{ url_for('delete', id=todo.id) }}">Delete</a>
     </li>
     {% endfor %}
